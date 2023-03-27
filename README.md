@@ -4,10 +4,10 @@
   <!-- <a title="Chinese" href="./README.zh-CN.md">🇨🇳</a> -->
 </div>
 
-<div align="center"><a title="" href="https://github.com/zjykzj/pascal-voc"><img align="center" src="./imgs/pascal.png" alt=""></a></div>
+<div align="center"><a title="" href="https://github.com/zjykzj/vocdev"><img align="center" src="./imgs/vocdev.png" alt=""></a></div>
 
 <p align="center">
-  «pascal voc» saved some documents, code, and tools for Pascal VOC
+  «vocdev» saved some documents, code, and tools for Pascal VOC
 <br>
 <br>
   <a href="https://github.com/RichardLitt/standard-readme"><img src="https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat-square" alt=""></a>
@@ -33,7 +33,7 @@
 
 ## Contributing
 
-Anyone's participation is welcome! Open an [issue](https://github.com/zjykzj/pascal-voc/issues) or submit PRs.
+Anyone's participation is welcome! Open an [issue](https://github.com/zjykzj/vocdev/issues) or submit PRs.
 
 Small note:
 
