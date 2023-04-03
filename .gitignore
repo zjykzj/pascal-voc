@@ -695,3 +695,4 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+/py/data/
