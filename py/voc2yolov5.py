@@ -8,12 +8,10 @@
 """
 from typing import List
 
-import PIL
 import os.path
 
 import numpy as np
 from PIL import Image
-
 from tqdm import tqdm
 
 import torchvision.datasets as datasets
@@ -40,34 +38,35 @@ def process(dataset: datasets.VOCDetection, cls_list: List, dst_root):
             if difficult != 0:
                 continue
             cls_name = obj['name']
+            assert cls_name in cls_list, cls_name
             xmin = float(obj['bndbox']['xmin'])
             ymin = float(obj['bndbox']['ymin'])
             xmax = float(obj['bndbox']['xmax'])
             ymax = float(obj['bndbox']['ymax'])
 
-            xcenter = (xmin + xmax) / 2
-            ycenter = (ymin + ymax) / 2
+            x_center = (xmin + xmax) / 2
+            y_center = (ymin + ymax) / 2
             box_w = xmax - xmin
             box_h = ymax - ymin
             label_list.append(
-                [cls_list.index(cls_name), xcenter / img_w, ycenter / img_h, box_w / img_w, box_h / img_h])
+                [cls_list.index(cls_name), x_center / img_w, y_center / img_h, box_w / img_w, box_h / img_h])
 
         # Save
         image_name = os.path.basename(dataset.images[idx])
-        dst_img_path = os.path.join(dst_root, 'images', image_name)
+        dst_img_path = os.path.join(dst_image_root, image_name)
         assert not os.path.exists(dst_img_path), dst_img_path
         assert isinstance(image, Image.Image)
         image.save(dst_img_path)
 
         label_name = os.path.splitext(image_name)[0] + '.txt'
-        dst_label_path = os.path.join(dst_root, 'labels', label_name)
+        dst_label_path = os.path.join(dst_label_root, label_name)
         assert not os.path.exists(dst_label_path), dst_label_path
         np.savetxt(dst_label_path, label_list, fmt='%f', delimiter=' ')
 
 
 def create_yolov1_voc_dataset(data_root, cls_list, dst_root):
     print("=> Process train")
-    dst_train_root = os.path.join(dst_root, 'yolov1-voc-train')
+    dst_train_root = os.path.join(dst_root, 'voc-yolov5-train')
     dataset = datasets.VOCDetection(data_root, year='2012', image_set='train', download=True)
     process(dataset, list(cls_list), dst_train_root)
 
@@ -78,7 +77,7 @@ def create_yolov1_voc_dataset(data_root, cls_list, dst_root):
     process(dataset, list(cls_list), dst_train_root)
 
     print("=> Process val")
-    dst_val_root = os.path.join(dst_root, 'yolov1-voc-val')
+    dst_val_root = os.path.join(dst_root, 'voc-yolov5-val')
     dataset = datasets.VOCDetection(data_root, year='2012', image_set='val', download=True)
     process(dataset, list(cls_list), dst_val_root)
 
