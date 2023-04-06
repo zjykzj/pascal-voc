@@ -27,7 +27,7 @@ SUPPORTS = ['train-2007', 'val-2007', 'test-2007', 'trainval-2007',
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="")
+    parser = argparse.ArgumentParser(description="VOC2YOLOv5")
     parser.add_argument('-s', '--src', metavar='SRC', type=str, help='Target Dataset Original Path.')
     parser.add_argument('-d', '--dst', metavar='DST', type=str, help='Target Dataset Result Path.')
     parser.add_argument("-l", '--list', nargs='+',
@@ -38,7 +38,7 @@ def parse_args():
     return args
 
 
-def process(dataset: datasets.VOCDetection, cls_list: List, dst_root):
+def process(dataset: datasets.VOCDetection, cls_list: List, dst_root: str):
     if not os.path.exists(dst_root):
         os.makedirs(dst_root)
     dst_image_root = os.path.join(dst_root, 'images')
