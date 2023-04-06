@@ -4,10 +4,15 @@
 @date: 2023/3/27 下午10:09
 @file: voc2yolov5.py
 @author: zj
-@description: 
+@description:
+
+>>>python voc2yolov5.py -s /home/zj/data/voc -d /home/zj/data/voc/voc2yolov5-train -l trainval-2007 train-2012 test-2007
+>>>python voc2yolov5.py -s /home/zj/data/voc -d /home/zj/data/voc/voc2yolov5-test -l val-2012
 """
+import argparse
 from typing import List
 
+import sys
 import os.path
 
 import numpy as np
@@ -15,6 +20,22 @@ from PIL import Image
 from tqdm import tqdm
 
 import torchvision.datasets as datasets
+
+DELIMITER = '-'
+SUPPORTS = ['train-2007', 'val-2007', 'test-2007', 'trainval-2007',
+            'train-2012', 'val-2012', 'trainval-2007']
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument('-s', '--src', metavar='SRC', type=str, help='Target Dataset Original Path.')
+    parser.add_argument('-d', '--dst', metavar='DST', type=str, help='Target Dataset Result Path.')
+    parser.add_argument("-l", '--list', nargs='+',
+                        help='Specify dataset type and year. For example, test-2007、train-2012', required=True)
+
+    args = parser.parse_args()
+    print("args:", args)
+    return args
 
 
 def process(dataset: datasets.VOCDetection, cls_list: List, dst_root):
@@ -64,31 +85,24 @@ def process(dataset: datasets.VOCDetection, cls_list: List, dst_root):
         np.savetxt(dst_label_path, label_list, fmt='%f', delimiter=' ')
 
 
-def create_yolov1_voc_dataset(data_root, cls_list, dst_root):
-    print("=> Process train")
-    dst_train_root = os.path.join(dst_root, 'voc-yolov5-train')
-    dataset = datasets.VOCDetection(data_root, year='2012', image_set='train', download=True)
-    process(dataset, list(cls_list), dst_train_root)
+def main(args):
+    data_root = os.path.abspath(args.src)
+    dst_data_root = os.path.abspath(args.dst)
 
-    dataset = datasets.VOCDetection(data_root, year='2007', image_set='train', download=True)
-    process(dataset, list(cls_list), dst_train_root)
+    cls_path = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), '../voc.names')
+    cls_list = np.loadtxt(cls_path, dtype=str, delimiter=' ')
+    print('cls_list:', cls_list)
 
-    dataset = datasets.VOCDetection(data_root, year='2007', image_set='test', download=True)
-    process(dataset, list(cls_list), dst_train_root)
+    for item in args.list:
+        assert item in SUPPORTS, item
+        dataset_type, year = item.split(DELIMITER)
+        print(f"Process Pascal VOC {dataset_type} {year}")
 
-    print("=> Process val")
-    dst_val_root = os.path.join(dst_root, 'voc-yolov5-val')
-    dataset = datasets.VOCDetection(data_root, year='2012', image_set='val', download=True)
-    process(dataset, list(cls_list), dst_val_root)
+        dataset = datasets.VOCDetection(data_root, year=year, image_set=dataset_type, download=True)
+        process(dataset, list(cls_list), dst_data_root)
 
 
 if __name__ == '__main__':
-    data_root = '~/data/voc'
-    if not os.path.exists(data_root):
-        os.makedirs(data_root)
-
-    cls_list = np.loadtxt('../voc.names', dtype=str, delimiter=' ')
-    print(cls_list)
-
-    dst_root = './data'
-    create_yolov1_voc_dataset(data_root, cls_list, dst_root)
+    args = parse_args()
+    print(args)
+    main(args)
