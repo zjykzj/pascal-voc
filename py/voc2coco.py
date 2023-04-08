@@ -5,7 +5,7 @@
 @file: voc2coco.py
 @author: zj
 @description:
-python voc2coco.py -v /home/zj/data/voc -c /home/zj/data/voc2coco -l train-2007 val-2007 test-2007 train-2012 val-2012
+python voc2coco.py -v /home/zj/data/voc -c /home/zj/data/voc/voc2coco -l train-2007 val-2007 test-2007 train-2012 val-2012
 """
 import json
 import os
@@ -51,6 +51,8 @@ def process(dataset: datasets.VOCDetection, cls_list: List, dst_root: str):
 
     coco_anno_list = list()
     coco_image_list = list()
+
+    bbox_id = 0
     for idx in tqdm(range(len(dataset.images))):
         image, target = dataset.__getitem__(idx)
         img_w = int(target['annotation']['size']['width'])
@@ -74,19 +76,23 @@ def process(dataset: datasets.VOCDetection, cls_list: List, dst_root: str):
             box_h = ymax - ymin
 
             anno_dict = dict()
-            anno_dict['area'] = img_w * img_h
-            anno_dict['iscrowd'] = str(0)
+            anno_dict['area'] = float(img_w * img_h)
+            anno_dict['iscrowd'] = int(0)
             anno_dict['image_id'] = image_name
             anno_dict['bbox'] = [xmin, ymin, box_w, box_h]
-            anno_dict['category_id'] = cls_list.index(cls_name)
-            anno_dict['id'] = str(idx + 1)
+            # 分类下标，从1开始
+            anno_dict['category_id'] = cls_list.index(cls_name) + 1
+            # 边界框id，每个边界框一个独立id
+            anno_dict['id'] = bbox_id
+            bbox_id += 1
             coco_anno_list.append(anno_dict)
 
         image_dict = dict()
         image_dict['file_name'] = file_name
         image_dict['height'] = img_h
         image_dict['width'] = img_w
-        image_dict['id'] = idx + 1
+        # 图片名。在coco数据集中，需要加上前缀`000000`，生成000000{id}.jpg
+        image_dict['id'] = image_name
         coco_image_list.append(image_dict)
 
         # Save
@@ -99,6 +105,7 @@ def process(dataset: datasets.VOCDetection, cls_list: List, dst_root: str):
     for idx, cls_name in enumerate(cls_list):
         category_dict = dict()
         category_dict['supercategory'] = cls_name
+        # 等同于category_id
         category_dict['id'] = idx + 1
         category_dict['name'] = cls_name
         coco_category_list.append(category_dict)
@@ -133,5 +140,5 @@ def main(args):
 
 if __name__ == '__main__':
     args = parse_args()
-    print(args)
+    print('args:', args)
     main(args)
