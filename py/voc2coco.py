@@ -5,7 +5,7 @@
 @file: voc2coco.py
 @author: zj
 @description:
-python voc2coco.py -v /home/zj/data/voc -c /home/zj/data/voc2coco -l trainval-2007 test-2007 train-2012 val-2012
+python voc2coco.py -v /home/zj/data/voc -c /home/zj/data/voc2coco -l train-2007 val-2007 test-2007 train-2012 val-2012
 """
 import json
 import os
@@ -56,7 +56,7 @@ def process(dataset: datasets.VOCDetection, cls_list: List, dst_root: str):
         img_w = int(target['annotation']['size']['width'])
         img_h = int(target['annotation']['size']['height'])
         file_name = os.path.basename(dataset.images[idx])
-        image_name = os.path.split(file_name)[0]
+        image_name = os.path.splitext(file_name)[0]
 
         for obj in target['annotation']['object']:
             difficult = int(obj['difficult'])
@@ -75,11 +75,11 @@ def process(dataset: datasets.VOCDetection, cls_list: List, dst_root: str):
 
             anno_dict = dict()
             anno_dict['area'] = img_w * img_h
-            anno_dict['iscrowd'] = 0
+            anno_dict['iscrowd'] = str(0)
             anno_dict['image_id'] = image_name
             anno_dict['bbox'] = [xmin, ymin, box_w, box_h]
             anno_dict['category_id'] = cls_list.index(cls_name)
-            anno_dict['id'] = idx + 1
+            anno_dict['id'] = str(idx + 1)
             coco_anno_list.append(anno_dict)
 
         image_dict = dict()
