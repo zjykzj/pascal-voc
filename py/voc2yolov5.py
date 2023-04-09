@@ -7,7 +7,7 @@
 @description:
 
 >>>python voc2yolov5.py -s /home/zj/data/voc -d /home/zj/data/voc/voc2yolov5-train -l trainval-2007 train-2012 test-2007
->>>python voc2yolov5.py -s /home/zj/data/voc -d /home/zj/data/voc/voc2yolov5-test -l val-2012
+>>>python voc2yolov5.py -s /home/zj/data/voc -d /home/zj/data/voc/voc2yolov5-val -l val-2012
 """
 import argparse
 from typing import List
@@ -69,6 +69,7 @@ def process(dataset: datasets.VOCDetection, cls_list: List, dst_root: str):
             y_center = (ymin + ymax) / 2
             box_w = xmax - xmin
             box_h = ymax - ymin
+            # [x1, y1, x2, y2] -> [cls_id, x_center/img_w, y_center/img_h, box_w/img_w, box_h/img_h]
             label_list.append(
                 [cls_list.index(cls_name), x_center / img_w, y_center / img_h, box_w / img_w, box_h / img_h])
 

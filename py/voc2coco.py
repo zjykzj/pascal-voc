@@ -5,7 +5,7 @@
 @file: voc2coco.py
 @author: zj
 @description:
-python voc2coco.py -v /home/zj/data/voc -c /home/zj/data/voc/voc2coco -l train-2007 val-2007 test-2007 train-2012 val-2012
+>>>python voc2coco.py -v /home/zj/data/voc -c /home/zj/data/voc/voc2coco -l train-2007 val-2007 test-2007 train-2012 val-2012
 """
 import json
 import os
