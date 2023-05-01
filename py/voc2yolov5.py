@@ -6,8 +6,8 @@
 @author: zj
 @description:
 
->>>python voc2yolov5.py -s /home/zj/data/voc -d /home/zj/data/voc/voc2yolov5-train -l trainval-2007 train-2012 test-2007
->>>python voc2yolov5.py -s /home/zj/data/voc -d /home/zj/data/voc/voc2yolov5-val -l val-2012
+>>>python voc2yolov5.py -s /home/zj/data/voc -d /home/zj/data/voc/voc2yolov5-train -l trainval-2007 trainval-2012
+>>>python voc2yolov5.py -s /home/zj/data/voc -d /home/zj/data/voc/voc2yolov5-val -l test-2007
 """
 import argparse
 from typing import List
@@ -23,7 +23,7 @@ import torchvision.datasets as datasets
 
 DELIMITER = '-'
 SUPPORTS = ['train-2007', 'val-2007', 'test-2007', 'trainval-2007',
-            'train-2012', 'val-2012', 'trainval-2007']
+            'train-2012', 'val-2012', 'trainval-2012']
 
 
 def parse_args():
@@ -97,7 +97,7 @@ def main(args):
     for item in args.list:
         assert item in SUPPORTS, item
         dataset_type, year = item.split(DELIMITER)
-        print(f"Process Pascal VOC {dataset_type} {year}")
+        print(f"Process Pascal VOC{year} {dataset_type}")
 
         dataset = datasets.VOCDetection(data_root, year=year, image_set=dataset_type, download=True)
         process(dataset, list(cls_list), dst_data_root)
@@ -105,5 +105,4 @@ def main(args):
 
 if __name__ == '__main__':
     args = parse_args()
-    print(args)
     main(args)
