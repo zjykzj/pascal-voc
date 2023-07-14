@@ -1,7 +1,7 @@
 <div align="right">
   Language:
     🇺🇸
-  <!-- <a title="Chinese" href="./README.zh-CN.md">🇨🇳</a> -->
+  <a title="Chinese" href="./README.zh-CN.md">🇨🇳</a>
 </div>
 
 <div align="center"><a title="" href="https://github.com/zjykzj/vocdev"><img align="center" src="./imgs/vocdev.png" alt=""></a></div>
