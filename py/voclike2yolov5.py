@@ -7,7 +7,8 @@
 @Description:
 
 Usage: Parse VOC XML:
-    $ python3 py/voclike2yolov5.py assets/voclike/000006.xml
+    $ python3 py/voclike2yolov5.py -x assets/voclike/000006.xml -c assets/voclike/classes
+
 """
 
 import argparse
@@ -16,11 +17,15 @@ import collections
 from typing import Dict, List, Any
 import xml.etree.ElementTree as ET
 
+import numpy as np
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="VOCLike2YOLOv5")
-    parser.add_argument('xml', metavar='XML', type=str, default='assets/voclike/000006.xml',
+    parser.add_argument('-x', '--xml', metavar='XML', type=str, default='assets/voclike/000006.xml',
                         help='VOCLike XML path.')
+    parser.add_argument('-c', '--classes', metavar='CLASSES', type=str, default='assets/voclike/classes',
+                        help='VOCLike CLASS path.')
 
     args = parser.parse_args()
     print("args:", args)
@@ -75,4 +80,11 @@ def parse_voc_xml(node: ET.Element) -> Dict[str, Any]:
 if __name__ == '__main__':
     args = parse_args()
     target = parse_voc_xml(ET.parse(args.xml).getroot())
-    print(target)
+    print(f"target: {target}")
+
+    classes = np.loadtxt(args.classes, dtype=str, delimiter=" ").tolist()
+    if isinstance(classes, str):
+        classes = [classes]
+    print(f"classes: {classes}")
+    label_list = voc2yolov5_label(target, classes)
+    print(f"label_list: {label_list}")
