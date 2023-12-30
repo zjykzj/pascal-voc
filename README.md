@@ -15,6 +15,15 @@
   <a href="http://commitizen.github.io/cz-cli/"><img src="https://img.shields.io/badge/commitizen-friendly-brightgreen.svg" alt=""></a>
 </p>
 
+* Convert VOC dataset to COCO format
+  * [py/voc2coco.py](py/voc2coco.py)
+* Convert VOC dataset to YOLOv5 format
+  * [py/voc2yolov5.py](py/voc2yolov5.py)
+* Convert VOCLike data to YOLOv5 format
+  * [py/voclike2yolov5.py](py/voclike2yolov5.py)
+* Convert YOLOv5 labels to Pascal VOC
+  * [py/yolo2voclike.py](py/yolo2voclike.py)
+
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
