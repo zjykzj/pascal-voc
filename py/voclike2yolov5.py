@@ -1,32 +1,61 @@
 # -*- coding: utf-8 -*-
 
 """
-@Time    : 2023/11/13 20:08
+@Time    : 2023/11/18 20:08
 @File    : voclike2yolov5.py
 @Author  : zj
 @Description:
 
-Usage: Parse VOC XML:
-    $ python3 py/voclike2yolov5.py -x assets/voclike/000006.xml -c assets/voclike/classes
+Usage: Convert YOLOv5 labels to Pascal VOC:
+    $ python3 py/voclike2yolov5.py /path/to/voc_data/ /path/to/classes /path/to/yolov5_data/
+
+For /path/to/voc_data/, the save structure is as follows:
+
+    pascal_voc_data/
+        aaaa.jpg
+        aaaa.xml
+        bbbb.jpg
+        bbbb.xml
+        ...
+
+For /path/to/classes, the file content is as follows:
+
+    person
+    ...
+
+For /path/to/yolov5_data/, the file structure is as follows:
+
+    yolov5_data/
+        images/
+            aaaa.jpg
+            bbbb.jpg
+        labels/
+            aaaa.txt
+            bbbb.txt
 
 """
+from typing import Dict, List, Any
 
+import os
+import glob
+import shutil
 import argparse
 import collections
 
-from typing import Dict, List, Any
-import xml.etree.ElementTree as ET
-
+from tqdm import tqdm
 import numpy as np
+import xml.etree.ElementTree as ET
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="VOCLike2YOLOv5")
-    parser.add_argument('-x', '--xml', metavar='XML', type=str, default='assets/voclike/000006.xml',
-                        help='VOCLike XML path.')
-    parser.add_argument('-c', '--classes', metavar='CLASSES', type=str, default='assets/voclike/classes',
-                        help='VOCLike CLASS path.')
+    parser.add_argument('src', metavar='SRC', type=str,
+                        help='VOCLike data root path.')
+    parser.add_argument("classes", metavar='CLASSES', type=str,
+                        help="Classes path.")
 
+    parser.add_argument('dst', metavar='DST', type=str,
+                        help='YOLOv5 data root path.')
     args = parser.parse_args()
     print("args:", args)
     return args
@@ -77,14 +106,57 @@ def parse_voc_xml(node: ET.Element) -> Dict[str, Any]:
     return voc_dict
 
 
-if __name__ == '__main__':
-    args = parse_args()
-    target = parse_voc_xml(ET.parse(args.xml).getroot())
-    print(f"target: {target}")
+def load_voc_data(root):
+    assert os.path.isdir(root), root
 
-    classes = np.loadtxt(args.classes, dtype=str, delimiter=" ").tolist()
+    image_list = list()
+    xml_list = list()
+    for xml_path in glob.glob(os.path.join(root, '*.xml')):
+        image_path = xml_path.replace(".xml", ".jpg")
+        assert os.path.isfile(image_path), image_path
+
+        image_list.append(image_path)
+        xml_list.append(xml_path)
+
+    return image_list, xml_list
+
+
+def main(args):
+    save_root = args.dst
+    dst_image_root = os.path.join(save_root, "images")
+    if not os.path.exists(dst_image_root):
+        os.makedirs(dst_image_root)
+    dst_label_root = os.path.join(save_root, "labels")
+    if not os.path.exists(dst_label_root):
+        os.makedirs(dst_label_root)
+
+    class_path = args.classes
+    dst_class_path = os.path.join(save_root, os.path.basename(class_path))
+    shutil.copyfile(class_path, dst_class_path)
+    classes = np.loadtxt(class_path, dtype=str, delimiter=' ').tolist()
     if isinstance(classes, str):
         classes = [classes]
-    print(f"classes: {classes}")
-    label_list = voc2yolov5_label(target, classes)
-    print(f"label_list: {label_list}")
+
+    image_list, xml_list = load_voc_data(args.src)
+    for image_path, xml_path in tqdm(zip(image_list, xml_list), total=len(image_list)):
+        # Image
+        image_name = os.path.basename(image_path)
+        dst_image_path = os.path.join(dst_image_root, image_name)
+        shutil.copyfile(image_path, dst_image_path)
+
+        # Label
+        target = parse_voc_xml(ET.parse(xml_path).getroot())
+        # print(f"target: {target}")
+        label_list = voc2yolov5_label(target, classes)
+        # print(f"label_list: {label_list}")
+
+        label_name = os.path.basename(xml_path)
+        dst_label_path = os.path.join(dst_label_root, label_name)
+        np.savetxt(dst_label_path, label_list, fmt="%f", delimiter=' ')
+
+    print(f"Save to {save_root}")
+
+
+if __name__ == '__main__':
+    args = parse_args()
+    main(args)
