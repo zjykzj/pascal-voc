@@ -1,10 +1,38 @@
 # -*- coding: utf-8 -*-
 
 """
-@Time    : 2023/12/5 9:58
+@Time    : 2023/12/09 9:58
 @File    : yolo2voclike.py
 @Author  : zj
-@Description: 
+@Description:
+
+Usage: Convert YOLOv5 labels to Pascal VOC:
+    $ python3 py/yolo2voclike.py /path/to/yolov5_data/ /path/to/classes /path/to/voc_data/
+
+For /path/to/yolov5_data/, the file structure is as follows:
+
+    yolov5_data/
+        images/
+            aaaa.jpg
+            bbbb.jpg
+        labels/
+            aaaa.txt
+            bbbb.txt
+
+For /path/to/classes, the file content is as follows:
+
+    person
+    ...
+
+For /path/to/voc_data/, the save structure is as follows:
+
+    voc_data/
+        aaaa.jpg
+        aaaa.xml
+        bbbb.jpg
+        bbbb.xml
+        ...
+
 """
 
 import os
@@ -21,7 +49,7 @@ XML_SAMPLE = "assets/voclike/000006.xml"
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="VOCLike2YOLOv5")
+    parser = argparse.ArgumentParser(description="YOLO2VOCLike")
     parser.add_argument('src', metavar='SRC', type=str,
                         help='YOLOv5 data root path.')
     parser.add_argument("classes", metavar='CLASSES', type=str,
@@ -45,7 +73,7 @@ def load_yolo_data(root):
 
     image_list = list()
     label_list = list()
-    for label_path in glob.glob(os.path.join(label_root, "*.txt")):
+    for label_path in list(glob.glob(os.path.join(label_root, "*.txt")))[::20]:
         image_path = label_path.replace("labels", "images").replace(".txt", ".jpg")
         if os.path.isfile(image_path):
             image_list.append(image_path)
