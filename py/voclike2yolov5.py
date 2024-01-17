@@ -37,13 +37,14 @@ For /path/to/yolov5_data/, the file structure is as follows:
 from typing import Dict, List, Any
 
 import os
-import glob
+# import glob
 import shutil
 import argparse
 import collections
 
-from tqdm import tqdm
 import numpy as np
+from tqdm import tqdm
+from pathlib import Path
 import xml.etree.ElementTree as ET
 
 
@@ -111,8 +112,9 @@ def load_voc_data(root):
 
     image_list = list()
     xml_list = list()
-    for xml_path in glob.glob(os.path.join(root, '*.xml')):
-        image_path = xml_path.replace(".xml", ".jpg")
+    print(f"Retrieval {root}")
+    for xml_path in Path(root).rglob(pattern="*.xml"):
+        image_path = str(xml_path).replace(".xml", ".jpg")
         assert os.path.isfile(image_path), image_path
 
         image_list.append(image_path)
@@ -150,7 +152,7 @@ def main(args):
         label_list = voc2yolov5_label(target, classes)
         # print(f"label_list: {label_list}")
 
-        label_name = os.path.basename(xml_path)
+        label_name = os.path.basename(xml_path).replace(".xml", ".txt")
         dst_label_path = os.path.join(dst_label_root, label_name)
         np.savetxt(dst_label_path, label_list, fmt="%f", delimiter=' ')
 
