@@ -6,13 +6,14 @@
 @author: zj
 @description:
 
->>>python voc2yolov5.py -s /home/zj/data/voc -d /home/zj/data/voc/voc2yolov5-train -l trainval-2007 trainval-2012
->>>python voc2yolov5.py -s /home/zj/data/voc -d /home/zj/data/voc/voc2yolov5-val -l test-2007
+Usage - Convert VOC dataset to YOLOv5:
+    $ python py/voc2yolov5.py -s ../datasets/voc -d ../datasets/voc2yolov5-train -l trainval-2007 trainval-2012
+    $ python py/voc2yolov5.py -s ../datasets/voc -d ../datasets/voc2yolov5-val -l test-2007
+
 """
 import argparse
 from typing import List
 
-import sys
 import os.path
 
 import numpy as np
@@ -32,6 +33,9 @@ def parse_args():
     parser.add_argument('-d', '--dst', metavar='DST', type=str, help='Target Dataset Result Path.')
     parser.add_argument("-l", '--list', nargs='+',
                         help='Specify dataset type and year. For example, test-2007、train-2012', required=True)
+
+    parser.add_argument('--classes', metavar='CLASSES', type=str, default="voc.names",
+                        help='Path of VOC classes')
 
     args = parser.parse_args()
     print("args:", args)
@@ -90,8 +94,7 @@ def main(args):
     data_root = os.path.abspath(args.src)
     dst_data_root = os.path.abspath(args.dst)
 
-    cls_path = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), '../voc.names')
-    cls_list = np.loadtxt(cls_path, dtype=str, delimiter=' ')
+    cls_list = np.loadtxt(args.classes, dtype=str, delimiter=' ')
     print('cls_list:', cls_list)
 
     for item in args.list:

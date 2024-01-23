@@ -5,7 +5,10 @@
 @file: voc2coco.py
 @author: zj
 @description:
->>>python voc2coco.py -v /home/zj/data/voc -c /home/zj/data/voc/voc2coco -l train-2007 val-2007 test-2007 train-2012 val-2012
+
+Usage - Convert VOC to COCO:
+    $ python voc2coco.py -v ../datasets/voc -c ../datasets/voc2coco -l train-2007 val-2007 test-2007 train-2012 val-2012
+
 """
 import json
 import os
@@ -33,6 +36,9 @@ def parse_args():
     parser.add_argument('-c', '--coco', metavar='COCO', type=str, help='Root Path of COCO-styled Dataset.')
     parser.add_argument("-l", '--list', nargs='+',
                         help='Specify dataset type and year. For example, test-2007、train-2012', required=True)
+
+    parser.add_argument('--classes', metavar='CLASSES', type=str, default="voc.names",
+                        help='Path of VOC classes')
 
     args = parser.parse_args()
     print("args:", args)
@@ -125,8 +131,7 @@ def main(args):
     data_root = os.path.abspath(args.voc)
     dst_data_root = os.path.abspath(args.coco)
 
-    cls_path = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), '../voc.names')
-    cls_list = np.loadtxt(cls_path, dtype=str, delimiter=' ')
+    cls_list = np.loadtxt(args.classes, dtype=str, delimiter=' ')
     print('cls_list:', cls_list)
 
     for item in args.list:
