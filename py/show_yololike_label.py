@@ -6,14 +6,17 @@
 @Author  : zj
 @Description:
 
-Usage: Show image with YOLOLike label:
-    $ python3 py/show_yololike_label.py ./assets/yololike/000000082986.jpg ./assets/yololike/000000082986.txt
+The parameter `image` can be a file or a directory, and the parameter `label` must correspond to.
+
+When specified as a directory, the program will first search for all images, and then search for corresponding file in the `label`
+
+Usage: Show image with VOCLike label:
+    $ python3 py/show_yololike_label.py assets/yololike/000000082986.jpg assets/yololike/000000082986.txt
+    $ python3 py/show_yololike_label.py assets/yololike/ assets/yololike/
 
 Usage: Save annotated image:
-    $ python3 py/show_yololike_label.py ./assets/yololike/000000082986.jpg ./assets/yololike/000000082986.txt --dst ./output/
-
-Usage: Show Multi-images:
-    $ python3 py/show_yololike_label.py ./assets/yololike/ ./assets/yololike/
+    $ python3 py/show_yololike_label.py assets/yololike/000000082986.jpg assets/yololike/000000082986.txt --dst ./output/
+    $ python3 py/show_yololike_label.py assets/yololike/ assets/yololike/ --dst ./output/
 
 """
 
@@ -81,23 +84,26 @@ def show_image_label(image_path: str, label_path: str) -> Tuple[ndarray, str]:
 
 
 def main(args: Namespace):
-    dst_dir = args.dst
+    image_list = []
+    label_list = []
     if os.path.isfile(args.image) and os.path.isfile(args.label):
-        image_list = [args.image]
-        label_list = [args.label]
-    else:
-        assert os.path.isdir(args.image) and os.path.isdir(args.label)
-        image_list = []
-        label_list = []
-        for image_path in (glob.glob(os.path.join(args.image, "*.jpg")) + glob.glob(os.path.join(args.image, "*.png"))):
-            image_name = os.path.basename(image_path)
-            label_name = os.path.splitext(image_name)[0] + ".txt"
-            label_path = os.path.join(args.label, label_name)
-            assert os.path.isfile(image_path) and os.path.isfile(label_path), print(
-                f"Image path: {image_path}, Label path: {label_path}")
+        image_list.append(args.image)
+        label_list.append(args.label)
+    elif os.path.isdir(args.image) and os.path.isdir(args.label):
+        image_dir = args.image
+        label_dir = args.label
+        for image_path in (glob.glob(os.path.join(image_dir, "*.jpg")) + glob.glob(os.path.join(image_dir, "*.png"))):
+            image_name = os.path.splitext(os.path.basename(image_path))[0]
+            label_path = os.path.join(label_dir, f"{image_name}.txt")
+            if not os.path.exists(label_path):
+                continue
+
             image_list.append(image_path)
             label_list.append(label_path)
+    else:
+        raise ValueError("Please provide correct args.image and args.label")
 
+    dst_dir = args.dst
     for image_path, label_path in zip(image_list, label_list):
         image, image_name = show_image_label(image_path, label_path)
 

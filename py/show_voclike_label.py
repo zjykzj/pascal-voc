@@ -71,9 +71,7 @@ def main(args):
     elif os.path.isdir(args.image) and os.path.isdir(args.label):
         image_dir = args.image
         label_dir = args.label
-        for image_path in glob.glob(os.path.join(image_dir, "*.jpg")):
-            if not image_path.endswith('.jpg'):
-                continue
+        for image_path in (glob.glob(os.path.join(image_dir, "*.jpg")) + glob.glob(os.path.join(image_dir, "*.png"))):
             image_name = os.path.splitext(os.path.basename(image_path))[0]
             label_path = os.path.join(label_dir, f"{image_name}.xml")
             if not os.path.exists(label_path):
