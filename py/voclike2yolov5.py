@@ -7,16 +7,7 @@
 @Description:
 
 Usage: Convert YOLOv5 labels to Pascal VOC:
-    $ python3 py/voclike2yolov5.py /path/to/voc_data/ /path/to/classes /path/to/yolov5_data/
-
-For /path/to/voc_data/, the save structure is as follows:
-
-    pascal_voc_data/
-        aaaa.jpg
-        aaaa.xml
-        bbbb.jpg
-        bbbb.xml
-        ...
+    $ python3 py/voclike2yolov5.py assets/voclike assets/voclike ./voc.names ./output/yolo_data/
 
 For /path/to/classes, the file content is as follows:
 
@@ -37,7 +28,6 @@ For /path/to/yolov5_data/, the file structure is as follows:
 from typing import Dict, List, Any
 
 import os
-# import glob
 import shutil
 import argparse
 import collections
@@ -50,8 +40,10 @@ import xml.etree.ElementTree as ET
 
 def parse_args():
     parser = argparse.ArgumentParser(description="VOCLike2YOLOv5")
-    parser.add_argument('src', metavar='SRC', type=str,
-                        help='VOCLike data root path.')
+    parser.add_argument('image', metavar='IMAGE', type=str,
+                        help='Image root.')
+    parser.add_argument('label', metavar='LABEL', type=str,
+                        help='Label path.')
     parser.add_argument("classes", metavar='CLASSES', type=str,
                         help="Classes path.")
 
@@ -107,14 +99,14 @@ def parse_voc_xml(node: ET.Element) -> Dict[str, Any]:
     return voc_dict
 
 
-def load_voc_data(root):
-    assert os.path.isdir(root), root
+def load_voc_data(image_dir: str, label_dir: str):
+    assert os.path.isdir(image_dir) and os.path.isdir(label_dir), "Image and label directories must exist"
 
     image_list = list()
     xml_list = list()
-    print(f"Retrieval {root}")
-    for xml_path in Path(root).rglob(pattern="*.xml"):
-        image_path = str(xml_path).replace(".xml", ".jpg")
+    print(f"Retrieval {label_dir}")
+    for xml_path in Path(label_dir).rglob(pattern="*.xml"):
+        image_path = str(xml_path).replace(label_dir, image_dir).replace(".xml", ".jpg")
         assert os.path.isfile(image_path), image_path
 
         image_list.append(image_path)
@@ -139,7 +131,7 @@ def main(args):
     if isinstance(classes, str):
         classes = [classes]
 
-    image_list, xml_list = load_voc_data(args.src)
+    image_list, xml_list = load_voc_data(args.image, args.label)
     for image_path, xml_path in tqdm(zip(image_list, xml_list), total=len(image_list)):
         # Image
         image_name = os.path.basename(image_path)
@@ -148,9 +140,7 @@ def main(args):
 
         # Label
         target = parse_voc_xml(ET.parse(xml_path).getroot())
-        # print(f"target: {target}")
         label_list = voc2yolov5_label(target, classes)
-        # print(f"label_list: {label_list}")
 
         label_name = os.path.basename(xml_path).replace(".xml", ".txt")
         dst_label_path = os.path.join(dst_label_root, label_name)
