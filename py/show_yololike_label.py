@@ -33,7 +33,7 @@ from numpy import ndarray
 
 
 def parse_args() -> Namespace:
-    parser = argparse.ArgumentParser(description="Show VOCLike label")
+    parser = argparse.ArgumentParser(description="Show YOLOLike label")
     parser.add_argument('image', metavar='IMAGE', type=str,
                         help='Image path, can be a file path or a directory.')
     parser.add_argument("label", metavar='LABEL', type=str,
@@ -51,8 +51,7 @@ def parse_yolo_txt(label_path: str) -> List:
     with open(label_path, 'r') as f:
         for line in f.readlines():
             items = line.strip().split(' ')
-            if len(items) != 5:
-                continue
+            assert len(items) > 5, label_path
 
             target.append(np.array(items, dtype=float))
     return target
@@ -65,11 +64,10 @@ def show_image_label(image_path: str, label_path: str) -> Tuple[ndarray, str]:
     # Label
     assert os.path.isfile(label_path), label_path
     target = parse_yolo_txt(label_path)
-    print(target)
 
     image_h, image_w = image.shape[:2]
     for items in target:
-        cls_id, xc, yc, box_w, box_h = items
+        cls_id, xc, yc, box_w, box_h = items[:5]
         print(cls_id, xc, yc, box_w, box_h)
 
         xmin = int((xc - box_w / 2) * image_w)
