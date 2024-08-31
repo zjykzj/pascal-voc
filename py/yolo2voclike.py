@@ -45,7 +45,7 @@ import cv2
 from tqdm import tqdm
 import numpy as np
 
-XML_SAMPLE = "assets/voclike/000006.xml"
+XML_SAMPLE = "assets/voclike/000136.xml"
 
 
 def parse_args():
@@ -73,7 +73,7 @@ def load_yolo_data(root):
 
     image_list = list()
     label_list = list()
-    for label_path in list(glob.glob(os.path.join(label_root, "*.txt")))[::20]:
+    for label_path in list(glob.glob(os.path.join(label_root, "*.txt"))):
         image_path = label_path.replace("labels", "images").replace(".txt", ".jpg")
         if os.path.isfile(image_path):
             image_list.append(image_path)
@@ -97,8 +97,11 @@ def parse_yolo_to_voc(image_path, label_path, classes):
 
     object_list = list()
     label_list = np.loadtxt(label_path, dtype=float, delimiter=' ')
+    if len(label_list.shape) == 1:
+        label_list = [label_list]
     for label in label_list:
-        cls_id, x_c, y_c, box_w, box_h = label
+        assert len(label) >= 5, label_path
+        cls_id, x_c, y_c, box_w, box_h = label[:5]
         class_name = classes[int(cls_id)]
         x_min = int((x_c - box_w / 2) * img_width)
         y_min = int((y_c - box_h / 2) * img_height)
